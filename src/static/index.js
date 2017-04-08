@@ -46,35 +46,28 @@ listener.on('child_added', function(data) {
   elmApp.ports.newEvent.send(event);
 });
 
-elmApp.ports.addEvent.subscribe(event => {
+elmApp.ports.addEvent.subscribe(function(event) {
   addEvent(event).then(
-    response => {
+    function(response) {
       elmApp.ports.eventSaved.send(response.key);
     },
-    err => {
+    function(err) {
       console.log('error:', err);
     }
   );
 });
 
-elmApp.ports.editEvent.subscribe(event => {
+elmApp.ports.editEvent.subscribe(function(event) {
   updateEvent(event).then(
-    () => {
+    function() {
       elmApp.ports.eventSaved.send(event.id);
     },
-    err => {
+    function(err) {
       console.log('error:', err);
     }
   );
 });
 
-elmApp.ports.removeEvent.subscribe(event => {
-  deleteEvent(event).then(
-    () => {
-      //elmApp.ports.eventSaved.send(event.id);
-    },
-    err => {
-      console.log('error:', err);
-    }
-  );
+elmApp.ports.removeEvent.subscribe(function(event) {
+  deleteEvent(event);
 });
