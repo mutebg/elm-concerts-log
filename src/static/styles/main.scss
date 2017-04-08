@@ -99,3 +99,20 @@ $btn-size: 3vw;
     cursor: pointer;
   }
 }
+
+.popup {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 10vh 10vw;
+  transition: 0.3s linear all;
+
+  &--hiden {
+    opacity: 0;
+    transform: scale(0);
+  }
+}

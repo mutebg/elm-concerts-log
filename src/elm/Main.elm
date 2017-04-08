@@ -2,7 +2,7 @@ port module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Array
 
 
@@ -22,31 +22,25 @@ type alias Event =
     }
 
 
-
--- Ports : Outgoing
--- Ports: Incoming
+type FormActions
+    = Add
+    | Edit
+    | None
 
 
 port newEvent : (Event -> msg) -> Sub msg
 
 
-
--- FAKE DATA
-
-
-radiohead : Event
-radiohead =
-    { id = "2", datetime = "20.12.2016", location = "London", name = "Radiohead", place = "O2", color = "red", imgUrl = "https://lastfm-img2.akamaized.net/i/u/770x0/598ae6dc5674923861236cca00e1eb84.jpg" }
+port addEvent : Event -> Cmd msg
 
 
-muse : Event
-muse =
-    { id = "1", datetime = "20.11.2016", location = "Amsterdam", name = "Muse", place = "Ziggo", color = "blue", imgUrl = "https://lastfm-img2.akamaized.net/i/u/770x0/2cf19f323f4c704a8a2a234a0e72988e.jpg" }
+port editEvent : Event -> Cmd msg
 
 
-lcd : Event
-lcd =
-    { id = "3", datetime = "20.10.2016", location = "Amsterdam", name = "LCD Soundsystem", place = "Ziggo", color = "pink", imgUrl = "https://lastfm-img2.akamaized.net/i/u/770x0/e2f3e6d6f22d4b76ab3460d95d11dc92.jpg" }
+port removeEvent : Event -> Cmd msg
+
+
+port eventSaved : (String -> msg) -> Sub msg
 
 
 
@@ -66,6 +60,8 @@ type alias Model =
     { events : List Event
     , selected : Int
     , openNav : Bool
+    , showForm : FormActions
+    , currentEvent : Event
     }
 
 
@@ -74,6 +70,8 @@ initModel =
     { selected = 0
     , events = []
     , openNav = False
+    , showForm = None
+    , currentEvent = emptyEvent
     }
 
 
@@ -90,6 +88,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ newEvent EventAdded
+        , eventSaved EventSaved
         ]
 
 
@@ -102,6 +101,14 @@ type Msg
     | ToggleNav
     | MoveTo Int
     | EventAdded Event
+    | AddEventForm
+    | CloseEventForm
+    | UpdateEvenInput String String
+    | SaveAddEvent
+    | EventSaved String
+    | EditEventForm Event
+    | SaveEditForm
+    | DeleteEvent Event
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -111,7 +118,7 @@ update msg model =
             ( model, Cmd.none )
 
         ToggleNav ->
-            ( toggleNav model, Cmd.none )
+            ( { model | openNav = not model.openNav }, Cmd.none )
 
         MoveTo newSelected ->
             ( moveTo newSelected model, Cmd.none )
@@ -122,6 +129,30 @@ update msg model =
                     event :: model.events
             in
                 ( { model | events = newEvents }, Cmd.none )
+
+        AddEventForm ->
+            ( { model | showForm = Add, openNav = False }, Cmd.none )
+
+        CloseEventForm ->
+            ( { model | showForm = None }, Cmd.none )
+
+        UpdateEvenInput inputName inputValue ->
+            ( updateFormInputs model inputName inputValue, Cmd.none )
+
+        SaveAddEvent ->
+            ( model, addEvent model.currentEvent )
+
+        EventSaved key ->
+            ( { model | currentEvent = emptyEvent, showForm = None }, Cmd.none )
+
+        EditEventForm event ->
+            ( { model | currentEvent = event, showForm = Edit }, Cmd.none )
+
+        SaveEditForm ->
+            ( updateEventInList model, editEvent model.currentEvent )
+
+        DeleteEvent event ->
+            ( deleteEventInList model event, removeEvent event )
 
 
 
@@ -145,6 +176,7 @@ view model =
         , button [ class "btn btn--prev", onClick (MoveTo (model.selected - 1)) ] [ text "<" ]
         , div [] [ printEvent <| getEvent model ]
         , button [ class "btn btn--next", onClick (MoveTo (model.selected + 1)) ] [ text ">" ]
+        , printEventPopup model
         ]
 
 
@@ -156,11 +188,6 @@ moveTo index model =
         { model | selected = List.length model.events - 1 }
     else
         { model | selected = 0 }
-
-
-toggleNav : Model -> Model
-toggleNav model =
-    { model | openNav = not model.openNav }
 
 
 getEvent : Model -> Maybe Event
@@ -180,6 +207,10 @@ printEvent event =
                     [ h1 [ class "event__title" ] [ text event.name ]
                     , p [ class "event__date" ] [ text event.datetime ]
                     , p [ class "event__place" ] [ text (event.place ++ ", " ++ event.location) ]
+                    , p [ class "event__edit" ]
+                        [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
+                        , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
+                        ]
                     ]
                 ]
 
@@ -187,9 +218,97 @@ printEvent event =
 printNav : Model -> Html Msg
 printNav model =
     div [ class "nav nav--show" ]
-        [ ul []
+        [ button [ onClick AddEventForm ] [ text "Add Event" ]
+        , ul
+            []
             (List.indexedMap
                 (\index event -> li [ onClick (MoveTo index) ] [ text event.name ])
                 model.events
             )
         ]
+
+
+printEventPopup : Model -> Html Msg
+printEventPopup model =
+    case model.showForm of
+        Add ->
+            div [ class "popup" ] [ printEventForm model.currentEvent "Add Event" SaveAddEvent ]
+
+        Edit ->
+            div [ class "popup" ] [ printEventForm model.currentEvent "Edit Event" SaveEditForm ]
+
+        None ->
+            div [ class "popup popup--hiden" ] []
+
+
+printEventForm : Event -> String -> Msg -> Html Msg
+printEventForm event title action =
+    div []
+        [ h1 [] [ text title ]
+        , button [ onClick CloseEventForm ] [ text "close" ]
+        , input [ type_ "text", placeholder "Name", value event.name, onInput (UpdateEvenInput "name") ] []
+        , input [ type_ "text", placeholder "Place", value event.place, onInput (UpdateEvenInput "place") ] []
+        , input [ type_ "text", placeholder "Location", value event.location, onInput (UpdateEvenInput "location") ] []
+        , input [ type_ "datetime-local", placeholder "Date/Time", value event.datetime, onInput (UpdateEvenInput "datetime") ] []
+        , input [ type_ "text", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
+        , button [ onClick action ] [ text "Save " ]
+        ]
+
+
+updateFormInputs : Model -> String -> String -> Model
+updateFormInputs model inputName inputValue =
+    let
+        oldCurrentEvent =
+            model.currentEvent
+
+        newCurrentEvent =
+            case inputName of
+                "name" ->
+                    { oldCurrentEvent | name = inputValue }
+
+                "place" ->
+                    { oldCurrentEvent | place = inputValue }
+
+                "location" ->
+                    { oldCurrentEvent | location = inputValue }
+
+                "datetime" ->
+                    { oldCurrentEvent | datetime = inputValue }
+
+                "imgUrl" ->
+                    { oldCurrentEvent | imgUrl = inputValue }
+
+                _ ->
+                    oldCurrentEvent
+    in
+        { model | currentEvent = newCurrentEvent }
+
+
+updateEventInList : Model -> Model
+updateEventInList model =
+    let
+        newEvents =
+            Array.toList <| Array.set model.selected model.currentEvent <| Array.fromList model.events
+    in
+        { model | events = newEvents }
+
+
+deleteEventInList : Model -> Event -> Model
+deleteEventInList model event =
+    let
+        newEvents =
+            List.filter (\e -> e.id /= event.id) model.events
+    in
+        { model | events = newEvents }
+
+
+emptyEvent : Event
+emptyEvent =
+    { id = ""
+    , imgUrl = ""
+    , location = ""
+    , name = ""
+    , place = ""
+    , color = "red"
+    , datetime = ""
+    }

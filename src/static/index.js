@@ -42,6 +42,39 @@ function eventsListener() {
 
 var listener = eventsListener();
 listener.on('child_added', function(data) {
-  var event = Object.assign({id: data.key}, data.val());
+  var event = Object.assign(data.val(), {id: data.key});
   elmApp.ports.newEvent.send(event);
+});
+
+elmApp.ports.addEvent.subscribe(event => {
+  addEvent(event).then(
+    response => {
+      elmApp.ports.eventSaved.send(response.key);
+    },
+    err => {
+      console.log('error:', err);
+    }
+  );
+});
+
+elmApp.ports.editEvent.subscribe(event => {
+  updateEvent(event).then(
+    () => {
+      elmApp.ports.eventSaved.send(event.id);
+    },
+    err => {
+      console.log('error:', err);
+    }
+  );
+});
+
+elmApp.ports.removeEvent.subscribe(event => {
+  deleteEvent(event).then(
+    () => {
+      //elmApp.ports.eventSaved.send(event.id);
+    },
+    err => {
+      console.log('error:', err);
+    }
+  );
 });
