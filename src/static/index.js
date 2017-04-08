@@ -3,4 +3,45 @@ require('./styles/main.scss');
 
 // inject bundled Elm app into div#main
 var Elm = require('../elm/Main');
-Elm.Main.embed(document.getElementById('main'));
+var elmApp = Elm.Main.embed(document.getElementById('main'));
+
+// Initialize Firebase
+var config = {
+  apiKey: 'AIzaSyCLfwCRlTMjo9hC657W3c65jnm5HMRQA7w',
+  authDomain: 'myevents-dc4e5.firebaseapp.com',
+  databaseURL: 'https://myevents-dc4e5.firebaseio.com',
+  projectId: 'myevents-dc4e5',
+  storageBucket: 'myevents-dc4e5.appspot.com',
+  messagingSenderId: '134196672178',
+};
+
+var app = firebase.initializeApp(config);
+var database = app.database();
+var EVENTS_PATH = 'events';
+
+function addEvent(event) {
+  var promise = database.ref(EVENTS_PATH).push(event);
+  return promise;
+}
+
+function updateEvent(event) {
+  var id = event.id;
+  var promise = database.ref(EVENTS_PATH + '/' + id).set(event);
+  return promise;
+}
+
+function deleteEvent(event) {
+  var id = event.id;
+  var promise = database.ref(EVENTS_PATH + '/' + id).remove();
+  return promise;
+}
+
+function eventsListener() {
+  return database.ref(EVENTS_PATH);
+}
+
+var listener = eventsListener();
+listener.on('child_added', function(data) {
+  var event = Object.assign({id: data.key}, data.val());
+  elmApp.ports.newEvent.send(event);
+});

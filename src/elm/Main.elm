@@ -1,11 +1,8 @@
-module Main exposing (..)
+port module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import GraphQL.Request.Builder exposing (..)
-import GraphQL.Request.Builder.Arg as Arg
-import GraphQL.Request.Builder.Variable as Var
 import Array
 
 
@@ -23,6 +20,14 @@ type alias Event =
     , color : String
     , datetime : String
     }
+
+
+
+-- Ports : Outgoing
+-- Ports: Incoming
+
+
+port newEvent : (Event -> msg) -> Sub msg
 
 
 
@@ -50,7 +55,7 @@ lcd =
 
 main : Program Never Model Msg
 main =
-    Html.beginnerProgram { model = model, view = view, update = update }
+    Html.program { init = init, view = view, update = update, subscriptions = subscriptions }
 
 
 
@@ -64,13 +69,28 @@ type alias Model =
     }
 
 
-model : Model
-model =
+initModel : Model
+initModel =
     { selected = 0
-    , events =
-        [ lcd, muse, radiohead ]
+    , events = []
     , openNav = False
     }
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( initModel, Cmd.none )
+
+
+
+-- SUBSCRIBTION
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ newEvent EventAdded
+        ]
 
 
 
@@ -81,19 +101,27 @@ type Msg
     = NoOp
     | ToggleNav
     | MoveTo Int
+    | EventAdded Event
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp ->
-            model
+            ( model, Cmd.none )
 
         ToggleNav ->
-            toggleNav model
+            ( toggleNav model, Cmd.none )
 
         MoveTo newSelected ->
-            moveTo newSelected model
+            ( moveTo newSelected model, Cmd.none )
+
+        EventAdded event ->
+            let
+                newEvents =
+                    event :: model.events
+            in
+                ( { model | events = newEvents }, Cmd.none )
 
 
 
