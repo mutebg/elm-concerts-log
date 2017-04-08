@@ -172,10 +172,10 @@ view model =
             )
         ]
         [ printNav model
-        , button [ class "nav-btn", onClick ToggleNav ] [ text "nav" ]
-        , button [ class "btn btn--prev", onClick (MoveTo (model.selected - 1)) ] [ text "<" ]
+        , button [ class "nav-btn", onClick ToggleNav ] []
+        , button [ class "btn btn--prev", onClick (MoveTo (model.selected - 1)) ] []
         , div [] [ printEvent <| getEvent model ]
-        , button [ class "btn btn--next", onClick (MoveTo (model.selected + 1)) ] [ text ">" ]
+        , button [ class "btn btn--next", onClick (MoveTo (model.selected + 1)) ] []
         , printEventPopup model
         ]
 
@@ -222,7 +222,13 @@ printNav model =
         , ul
             []
             (List.indexedMap
-                (\index event -> li [ onClick (MoveTo index) ] [ text event.name ])
+                (\index event ->
+                    li [ onClick (MoveTo index) ]
+                        [ span [ class "large" ] [ text event.name ]
+                        , span [ class "small" ]
+                            [ text (event.datetime ++ " " ++ event.place) ]
+                        ]
+                )
                 model.events
             )
         ]
@@ -243,15 +249,15 @@ printEventPopup model =
 
 printEventForm : Event -> String -> Msg -> Html Msg
 printEventForm event title action =
-    div []
-        [ h1 [] [ text title ]
-        , button [ onClick CloseEventForm ] [ text "close" ]
-        , input [ type_ "text", placeholder "Name", value event.name, onInput (UpdateEvenInput "name") ] []
-        , input [ type_ "text", placeholder "Place", value event.place, onInput (UpdateEvenInput "place") ] []
-        , input [ type_ "text", placeholder "Location", value event.location, onInput (UpdateEvenInput "location") ] []
-        , input [ type_ "datetime-local", placeholder "Date/Time", value event.datetime, onInput (UpdateEvenInput "datetime") ] []
-        , input [ type_ "text", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
-        , button [ onClick action ] [ text "Save " ]
+    div [ class "popup__box" ]
+        [ h1 [ class "popup__title" ] [ text title ]
+        , button [ class "popup__close", onClick CloseEventForm ] [ text "" ]
+        , input [ class "popup__input", type_ "text", placeholder "Name", value event.name, onInput (UpdateEvenInput "name") ] []
+        , input [ class "popup__input", type_ "text", placeholder "Place", value event.place, onInput (UpdateEvenInput "place") ] []
+        , input [ class "popup__input", type_ "text", placeholder "Location", value event.location, onInput (UpdateEvenInput "location") ] []
+        , input [ class "popup__input", type_ "datetime-local", placeholder "Date/Time", value event.datetime, onInput (UpdateEvenInput "datetime") ] []
+        , input [ class "popup__input", type_ "text", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
+        , button [ class "popup__submit", onClick action ] [ text "Save " ]
         ]
 
 
