@@ -21,6 +21,7 @@ type alias Event =
     , name : String
     , place : String
     , color : String
+    , datetime : String
     }
 
 
@@ -30,17 +31,17 @@ type alias Event =
 
 radiohead : Event
 radiohead =
-    { id = "2", imgUrl = "2.jpg", location = "Drente", name = "Radiohead", place = "Rose", color = "red" }
+    { id = "2", datetime = "20.12.2016", location = "London", name = "Radiohead", place = "O2", color = "red", imgUrl = "https://lastfm-img2.akamaized.net/i/u/770x0/598ae6dc5674923861236cca00e1eb84.jpg" }
 
 
 muse : Event
 muse =
-    { id = "1", imgUrl = "1.jpg", location = "Amsterdam", name = "Muse", place = "Ziggo", color = "blue" }
+    { id = "1", datetime = "20.11.2016", location = "Amsterdam", name = "Muse", place = "Ziggo", color = "blue", imgUrl = "https://lastfm-img2.akamaized.net/i/u/770x0/2cf19f323f4c704a8a2a234a0e72988e.jpg" }
 
 
-rhcp : Event
-rhcp =
-    { id = "3", imgUrl = "3.jpg", location = "Amsterdam", name = "RHCP", place = "Ziggo", color = "pink" }
+lcd : Event
+lcd =
+    { id = "3", datetime = "20.10.2016", location = "Amsterdam", name = "LCD Soundsystem", place = "Ziggo", color = "pink", imgUrl = "https://lastfm-img2.akamaized.net/i/u/770x0/e2f3e6d6f22d4b76ab3460d95d11dc92.jpg" }
 
 
 
@@ -59,6 +60,7 @@ main =
 type alias Model =
     { events : List Event
     , selected : Int
+    , openNav : Bool
     }
 
 
@@ -66,8 +68,8 @@ model : Model
 model =
     { selected = 0
     , events =
-        []
-        -- rhcp, muse, radiohead ]
+        [ lcd, muse, radiohead ]
+    , openNav = False
     }
 
 
@@ -77,8 +79,8 @@ model =
 
 type Msg
     = NoOp
-    | MoveForward
-    | MoveBack
+    | ToggleNav
+    | MoveTo Int
 
 
 update : Msg -> Model -> Model
@@ -87,11 +89,11 @@ update msg model =
         NoOp ->
             model
 
-        MoveForward ->
-            moveForward model
+        ToggleNav ->
+            toggleNav model
 
-        MoveBack ->
-            moveBack model
+        MoveTo newSelected ->
+            moveTo newSelected model
 
 
 
@@ -102,27 +104,35 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ button [ class "btn btn--prev", onClick MoveBack ] [ text "Back " ]
+    div
+        [ class
+            (if model.openNav then
+                "main main--with-nav"
+             else
+                "main"
+            )
+        ]
+        [ printNav model
+        , button [ class "nav-btn", onClick ToggleNav ] [ text "nav" ]
+        , button [ class "btn btn--prev", onClick (MoveTo (model.selected - 1)) ] [ text "<" ]
         , div [] [ printEvent <| getEvent model ]
-        , button [ class "btn btn--next", onClick MoveForward ] [ text "Forward " ]
+        , button [ class "btn btn--next", onClick (MoveTo (model.selected + 1)) ] [ text ">" ]
         ]
 
 
-moveForward : Model -> Model
-moveForward model =
-    if List.length model.events - 1 == model.selected then
-        { model | selected = 0 }
-    else
-        { model | selected = model.selected + 1 }
-
-
-moveBack : Model -> Model
-moveBack model =
-    if model.selected == 0 then
+moveTo : Int -> Model -> Model
+moveTo index model =
+    if index >= 0 && index < List.length model.events then
+        { model | selected = index }
+    else if 0 > index then
         { model | selected = List.length model.events - 1 }
     else
-        { model | selected = model.selected - 1 }
+        { model | selected = 0 }
+
+
+toggleNav : Model -> Model
+toggleNav model =
+    { model | openNav = not model.openNav }
 
 
 getEvent : Model -> Maybe Event
@@ -137,8 +147,21 @@ printEvent event =
             div [ class "error" ] [ text "NO SUCH A EVENT" ]
 
         Just event ->
-            div [ class "event" ]
-                [ h1 [ class "event__title" ] [ text event.name ]
-                , p [ class "event__place" ] [ text event.place ]
-                , p [ class "event__location" ] [ text event.location ]
+            div [ class ("event filter-" ++ event.color), style [ ( "background-image", "url(" ++ event.imgUrl ++ ")" ) ] ]
+                [ div [ class "event__box" ]
+                    [ h1 [ class "event__title" ] [ text event.name ]
+                    , p [ class "event__date" ] [ text event.datetime ]
+                    , p [ class "event__place" ] [ text (event.place ++ ", " ++ event.location) ]
+                    ]
                 ]
+
+
+printNav : Model -> Html Msg
+printNav model =
+    div [ class "nav nav--show" ]
+        [ ul []
+            (List.indexedMap
+                (\index event -> li [ onClick (MoveTo index) ] [ text event.name ])
+                model.events
+            )
+        ]
