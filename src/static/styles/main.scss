@@ -45,17 +45,17 @@ button {
 
   &--next {
     right: $body-offset;
-    background-image: url('../img/icon-right.svg');
+    background-image: url(/static/img/icon-right.svg);
   }
 
   &--prev {
     left: $body-offset;
-    background-image: url('../img/icon-left.svg');
+    background-image: url(/static/img/icon-left.svg);
   }
 }
 
 .events {
-  background: url('../img/bg-sprite.png') no-repeat -9999px -9999px;
+  background: url(/static/img/bg-sprite.png) no-repeat -9999px -9999px;
 	background-size: 0;
 }
 
@@ -96,7 +96,7 @@ button {
   }
 
   &--hide {
-  	mask: url('../img/bg-sprite.png');
+  	mask: url(/static/img/bg-sprite.png);
   	mask-size: 7100% 100%;
   	animation: mask-play 1.2s steps(70) forwards;
   }
@@ -118,7 +118,7 @@ button {
   right: $body-offset;
   width: $btn-size;
   height: $btn-size;
-  background: #fff url('../img/icon-menu.svg') no-repeat center center;
+  background: #fff url(/static/img/icon-menu.svg) no-repeat center center;
   background-size: 100% 100%;
   z-index: 110;
 }
@@ -152,7 +152,7 @@ button {
 
   button {
     padding: 1em 3em;
-    background: #cacaca no-repeat 1em center url('../img/icon-plus.svg');
+    background: #cacaca no-repeat 1em center url(/static/img/icon-plus.svg);
     width: 100%;
     text-align: left;
   }
@@ -183,7 +183,7 @@ button {
     position: absolute;
     top: $body-offset;
     right: $body-offset;
-    background: #fff url('../img/icon-close.svg') no-repeat center center;
+    background: #fff url(/static/img/icon-close.svg) no-repeat center center;
     background-size: 100% 100%;
     width: $btn-size;
     height: $btn-size;
@@ -193,7 +193,7 @@ button {
   &__submit {
     padding: 1em 3em;
     margin-top: 1em;
-    background: #cacaca no-repeat 1em center url('../img/icon-check.svg');
+    background: #cacaca no-repeat 1em center url(/static/img/icon-check.svg);
   }
 
   &__title {
