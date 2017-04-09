@@ -168,6 +168,7 @@ button {
   z-index: 130;
   background: rgba(255, 255, 255, 0.85);
   padding: 10vh 10vw;
+  transform-origin: 100% 0%;
   transition: 0.3s linear all;
 
   &--hiden {
