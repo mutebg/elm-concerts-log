@@ -245,6 +245,7 @@ printEvent selected next inTransition index event =
             [ class transitionClass
             , style
                 [ ( "background-image", "url(" ++ event.imgUrl ++ ")" )
+                , ( "background-color", event.color )
                 , ( "z-index", zIndex )
                 ]
             ]
