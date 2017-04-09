@@ -246,3 +246,13 @@ button {
     }
   }
 }
+
+.copy {
+  position: fixed;
+  position: absolute;
+  bottom: $btn-size / 2;
+  right: $btn-size;
+  z-index: 40;
+  color: #fff;
+  font-size: 1em;
+}

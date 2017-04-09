@@ -187,6 +187,7 @@ view model =
         , button [ class "btn btn--prev", disabled model.inTransition, onClick (TransitionTo (model.selected - 1)) ] []
         , printEvents model
         , button [ class "btn btn--next", disabled model.inTransition, onClick (TransitionTo (model.selected + 1)) ] []
+        , a [ href "https://github.com/mutebg/elm-concerts-log", class "copy" ] [ text "source code" ]
         , printEventPopup model
         ]
 
