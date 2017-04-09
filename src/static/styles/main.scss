@@ -41,7 +41,7 @@ button {
   background: #fff no-repeat center center;
   background-size: 100% 100%;
   border-radius: 50%;
-  z-index: 10;
+  z-index: 110;
 
   &--next {
     right: $body-offset;
@@ -54,16 +54,21 @@ button {
   }
 }
 
+.events {
+  background: url('../img/bg-sprite.png') no-repeat -9999px -9999px;
+	background-size: 0;
+}
+
 .event {
-  position: fixed;
+  position: absolute;
   width: 100vw;
   height: 100vh;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  line-height: 1.4;
   top: 0;
   left: 0;
-  background-position: top center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  line-height: 1.4;
 
   &__box {
     position: absolute;
@@ -89,6 +94,21 @@ button {
     padding: 0.5em;
     font-size: 0.7em;
   }
+
+  &--hide {
+  	mask: url('../img/bg-sprite.png');
+  	mask-size: 7100% 100%;
+  	animation: mask-play 1.2s steps(70) forwards;
+  }
+}
+
+@keyframes mask-play {
+  from {
+  	mask-position: 0% 0;
+  }
+  to {
+  	mask-position: 100% 0;
+  }
 }
 
 
@@ -100,7 +120,7 @@ button {
   height: $btn-size;
   background: #fff url('../img/icon-menu.svg') no-repeat center center;
   background-size: 100% 100%;
-  z-index: 10;
+  z-index: 110;
 }
 
 .nav {
@@ -112,7 +132,7 @@ button {
   top: 0;
   transform: translate3d(100%, 0, 0);
   transition: 0.3s linear transform;
-  z-index: 20;
+  z-index: 120;
 
   ul {
     list-style: none;
@@ -144,7 +164,7 @@ button {
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 30;
+  z-index: 130;
   background: rgba(255, 255, 255, 0.85);
   padding: 10vh 10vw;
   transition: 0.3s linear all;

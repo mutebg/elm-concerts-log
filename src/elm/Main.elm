@@ -4,6 +4,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Array
+import Time
+import Process
+import Task
 
 
 -- component import example
@@ -59,6 +62,8 @@ main =
 type alias Model =
     { events : List Event
     , selected : Int
+    , next : Int
+    , inTransition : Bool
     , openNav : Bool
     , showForm : FormActions
     , currentEvent : Event
@@ -68,6 +73,8 @@ type alias Model =
 initModel : Model
 initModel =
     { selected = 0
+    , next = 1
+    , inTransition = False
     , events = []
     , openNav = False
     , showForm = None
@@ -100,6 +107,7 @@ type Msg
     = NoOp
     | ToggleNav
     | MoveTo Int
+    | TransitionTo Int
     | EventAdded Event
     | AddEventForm
     | CloseEventForm
@@ -121,7 +129,10 @@ update msg model =
             ( { model | openNav = not model.openNav }, Cmd.none )
 
         MoveTo newSelected ->
-            ( moveTo newSelected model, Cmd.none )
+            ( { model | selected = moveTo newSelected model, inTransition = False }, Cmd.none )
+
+        TransitionTo newSelected ->
+            ( { model | inTransition = True, next = moveTo newSelected model }, delay 1200 (MoveTo newSelected) )
 
         EventAdded event ->
             let
@@ -173,46 +184,80 @@ view model =
         ]
         [ printNav model
         , button [ class "nav-btn", onClick ToggleNav ] []
-        , button [ class "btn btn--prev", onClick (MoveTo (model.selected - 1)) ] []
-        , div [] [ printEvent <| getEvent model ]
-        , button [ class "btn btn--next", onClick (MoveTo (model.selected + 1)) ] []
+        , button [ class "btn btn--prev", disabled model.inTransition, onClick (TransitionTo (model.selected - 1)) ] []
+        , printEvents model
+        , button [ class "btn btn--next", disabled model.inTransition, onClick (TransitionTo (model.selected + 1)) ] []
         , printEventPopup model
         ]
 
 
-moveTo : Int -> Model -> Model
+moveTo : Int -> Model -> Int
 moveTo index model =
     if index >= 0 && index < List.length model.events then
-        { model | selected = index }
+        index
     else if 0 > index then
-        { model | selected = List.length model.events - 1 }
+        List.length model.events - 1
     else
-        { model | selected = 0 }
+        0
 
 
-getEvent : Model -> Maybe Event
-getEvent model =
-    Array.get model.selected <| Array.fromList model.events
+delay : Time.Time -> msg -> Cmd msg
+delay time msg =
+    Process.sleep time
+        |> Task.andThen (always <| Task.succeed msg)
+        |> Task.perform identity
 
 
-printEvent : Maybe Event -> Html Msg
-printEvent event =
-    case event of
-        Nothing ->
-            div [ class "error" ] [ text "NO SUCH A EVENT" ]
 
-        Just event ->
-            div [ class ("event filter-" ++ event.color), style [ ( "background-image", "url(" ++ event.imgUrl ++ ")" ) ] ]
-                [ div [ class "event__box" ]
-                    [ h1 [ class "event__title" ] [ text event.name ]
-                    , p [ class "event__date" ] [ text event.datetime ]
-                    , p [ class "event__place" ] [ text (event.place ++ ", " ++ event.location) ]
-                    , p [ class "event__edit" ]
-                        [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
-                        , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
-                        ]
+-- getEvent : Model -> Maybe Event
+-- getEvent model =
+--     Array.get model.selected <| Array.fromList model.events
+
+
+printEvents : Model -> Html Msg
+printEvents model =
+    let
+        curryPrintEvent =
+            printEvent model.selected model.next model.inTransition
+    in
+        div [ class "events" ]
+            (List.indexedMap curryPrintEvent model.events)
+
+
+printEvent : Int -> Int -> Bool -> Int -> Event -> Html Msg
+printEvent selected next inTransition index event =
+    let
+        zIndex =
+            if selected == index then
+                "30"
+            else if next == index && inTransition then
+                "20"
+            else
+                "0"
+
+        transitionClass =
+            if inTransition && selected == index then
+                "event event--hide"
+            else
+                "event"
+    in
+        div
+            [ class transitionClass
+            , style
+                [ ( "background-image", "url(" ++ event.imgUrl ++ ")" )
+                , ( "z-index", zIndex )
+                ]
+            ]
+            [ div [ class "event__box" ]
+                [ h1 [ class "event__title" ] [ text event.name ]
+                , p [ class "event__date" ] [ text event.datetime ]
+                , p [ class "event__place" ] [ text (event.place ++ ", " ++ event.location) ]
+                , p [ class "event__edit" ]
+                    [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
+                    , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
                     ]
                 ]
+            ]
 
 
 printNav : Model -> Html Msg
@@ -223,7 +268,7 @@ printNav model =
             []
             (List.indexedMap
                 (\index event ->
-                    li [ onClick (MoveTo index) ]
+                    li [ onClick (TransitionTo index) ]
                         [ span [ class "large" ] [ text event.name ]
                         , span [ class "small" ]
                             [ text (event.datetime ++ " " ++ event.place) ]
@@ -256,7 +301,7 @@ printEventForm event title action =
         , input [ class "popup__input", type_ "text", placeholder "Place", value event.place, onInput (UpdateEvenInput "place") ] []
         , input [ class "popup__input", type_ "text", placeholder "Location", value event.location, onInput (UpdateEvenInput "location") ] []
         , input [ class "popup__input", type_ "datetime-local", placeholder "Date/Time", value event.datetime, onInput (UpdateEvenInput "datetime") ] []
-        , input [ class "popup__input", type_ "text", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
+        , input [ class "popup__input", type_ "url", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
         , button [ class "popup__submit", onClick action ] [ text "Save " ]
         ]
 
