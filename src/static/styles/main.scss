@@ -42,6 +42,11 @@ button {
   background-size: 100% 100%;
   border-radius: 50%;
   z-index: 110;
+  transition: 0.2s linear all;
+  &:hover {
+    transform: scale(1.1);
+    background-color: #cecbcb;
+  }
 
   &--next {
     right: $body-offset;
@@ -94,6 +99,11 @@ button {
     background: #fff;
     padding: 0.5em;
     font-size: 0.7em;
+    transition: 0.2s linear all;
+    &:hover {
+      transform: scale(1.05);
+      background: #cecbcb;
+    }
   }
 
   &--hide {
@@ -122,6 +132,11 @@ button {
   background: #fff url(/static/img/icon-menu.svg) no-repeat center center;
   background-size: 100% 100%;
   z-index: 110;
+  transition: 0.2s linear all;
+  &:hover {
+    transform: scale(1.1);
+    background-color: #cecbcb;
+  }
 }
 
 .nav {
@@ -143,6 +158,10 @@ button {
     padding: 1em;
     border-bottom: 1px solid #ccc;
     cursor: pointer;
+    transition: 0.2s background-color linear;
+    &:hover {
+      background-color: #f7f7f7;
+    }
 
     .small {
       font-size: 0.7em;
@@ -156,6 +175,10 @@ button {
     background: #cacaca no-repeat 1em center url(/static/img/icon-plus.svg);
     width: 100%;
     text-align: left;
+    transition: 0.2s background-color linear;
+    &:hover {
+      background-color: #f7f7f7;
+    }
   }
 }
 
@@ -189,6 +212,11 @@ button {
     background-size: 100% 100%;
     width: $btn-size;
     height: $btn-size;
+    transition: 0.2s linear all;
+    &:hover {
+      transform: scale(1.1);
+      background-color: #cecbcb;
+    }
 
   }
 
@@ -196,6 +224,10 @@ button {
     padding: 1em 3em;
     margin-top: 1em;
     background: #cacaca no-repeat 1em center url(/static/img/icon-check.svg);
+    transition: 0.2s linear all;
+    &:hover {
+      background-color: #f7f7f7;
+    }
   }
 
   &__title {
@@ -206,7 +238,11 @@ button {
     width: 100%;
     padding: 1em;
     background: #fff;
-    border: 1px solid #ccc;
+    border: 2px solid #ccc;
     margin-top: 1em;
+    transition: 0.2s linear all;
+    &:focus {
+      border-color: #999;
+    }
   }
 }
