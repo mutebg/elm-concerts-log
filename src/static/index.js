@@ -37,7 +37,7 @@ function deleteEvent(event) {
 }
 
 function eventsListener() {
-  return database.ref(EVENTS_PATH);
+  return database.ref(EVENTS_PATH).orderByChild('datetime');
 }
 
 var listener = eventsListener();

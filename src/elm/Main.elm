@@ -9,8 +9,15 @@ import Process
 import Task
 
 
--- component import example
--- import Components.Hello exposing ( hello )
+-- APP
+
+
+main : Program Never Model Msg
+main =
+    Html.program { init = init, view = view, update = update, subscriptions = subscriptions }
+
+
+
 -- TYPES
 
 
@@ -31,6 +38,10 @@ type FormActions
     | None
 
 
+
+-- PORTS
+
+
 port newEvent : (Event -> msg) -> Sub msg
 
 
@@ -44,15 +55,6 @@ port removeEvent : Event -> Cmd msg
 
 
 port eventSaved : (String -> msg) -> Sub msg
-
-
-
--- APP
-
-
-main : Program Never Model Msg
-main =
-    Html.program { init = init, view = view, update = update, subscriptions = subscriptions }
 
 
 
@@ -207,12 +209,6 @@ delay time msg =
     Process.sleep time
         |> Task.andThen (always <| Task.succeed msg)
         |> Task.perform identity
-
-
-
--- getEvent : Model -> Maybe Event
--- getEvent model =
---     Array.get model.selected <| Array.fromList model.events
 
 
 printEvents : Model -> Html Msg
