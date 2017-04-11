@@ -170,8 +170,6 @@ update msg model =
 
 
 -- VIEW
--- Html is defined as: elem [ attribs ][ children ]
--- CSS can be applied via class names or inline style attrib
 
 
 view : Model -> Html Msg
