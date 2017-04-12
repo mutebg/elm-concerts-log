@@ -245,6 +245,14 @@ button {
       border-color: #999;
     }
   }
+
+  &__img {
+    position: absolute;
+    height: calc(3em + 3px);
+    margin-top: calc(1em + 2px);
+    transform: translateX(-100%);
+    border-left: 2px solid #ccc;
+  }
 }
 
 .copy {

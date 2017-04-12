@@ -178,7 +178,7 @@ update msg model =
             ( updateFormInputs model "imgUrl" imgUrl, Cmd.none )
 
         NewImage (Err _) ->
-            ( model, Cmd.none )
+            ( updateFormInputs model "imgUrl" "http://kingofwallpapers.com/band/band-006.jpg", Cmd.none )
 
 
 
@@ -307,10 +307,11 @@ printEventForm event title action =
         [ h1 [ class "popup__title" ] [ text title ]
         , button [ class "popup__close", onClick CloseEventForm ] [ text "" ]
         , input [ class "popup__input", type_ "text", placeholder "Name", value event.name, onInput (UpdateEvenInput "name"), onBlur FetchImage ] []
+        , img [ class "popup__img", src event.imgUrl ] []
         , input [ class "popup__input", type_ "text", placeholder "Place", value event.place, onInput (UpdateEvenInput "place") ] []
         , input [ class "popup__input", type_ "text", placeholder "Location", value event.location, onInput (UpdateEvenInput "location") ] []
         , input [ class "popup__input", type_ "datetime-local", placeholder "Date/Time", value event.datetime, onInput (UpdateEvenInput "datetime") ] []
-        , input [ class "popup__input", type_ "url", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
+          --, input [ class "popup__input", type_ "url", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
         , button [ class "popup__submit", onClick action ] [ text "Save " ]
         ]
 
