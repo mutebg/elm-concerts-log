@@ -2,11 +2,13 @@ port module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onClick, onInput, onBlur)
 import Array
 import Time
 import Process
 import Task
+import Http
+import Json.Decode as Decode
 
 
 -- APP
@@ -119,6 +121,8 @@ type Msg
     | EditEventForm Event
     | SaveEditForm
     | DeleteEvent Event
+    | FetchImage
+    | NewImage (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -166,6 +170,15 @@ update msg model =
 
         DeleteEvent event ->
             ( deleteEventInList model event, removeEvent event )
+
+        FetchImage ->
+            ( model, fetchImage model.currentEvent.name )
+
+        NewImage (Ok imgUrl) ->
+            ( updateFormInputs model "imgUrl" imgUrl, Cmd.none )
+
+        NewImage (Err _) ->
+            ( model, Cmd.none )
 
 
 
@@ -293,7 +306,7 @@ printEventForm event title action =
     div [ class "popup__box" ]
         [ h1 [ class "popup__title" ] [ text title ]
         , button [ class "popup__close", onClick CloseEventForm ] [ text "" ]
-        , input [ class "popup__input", type_ "text", placeholder "Name", value event.name, onInput (UpdateEvenInput "name") ] []
+        , input [ class "popup__input", type_ "text", placeholder "Name", value event.name, onInput (UpdateEvenInput "name"), onBlur FetchImage ] []
         , input [ class "popup__input", type_ "text", placeholder "Place", value event.place, onInput (UpdateEvenInput "place") ] []
         , input [ class "popup__input", type_ "text", placeholder "Location", value event.location, onInput (UpdateEvenInput "location") ] []
         , input [ class "popup__input", type_ "datetime-local", placeholder "Date/Time", value event.datetime, onInput (UpdateEvenInput "datetime") ] []
@@ -359,3 +372,20 @@ emptyEvent =
     , color = "red"
     , datetime = ""
     }
+
+
+fetchImage : String -> Cmd Msg
+fetchImage artist =
+    let
+        url =
+            "https://api.spotify.com/v1/search?type=artist&q=" ++ artist
+
+        request =
+            Http.get url decodeImgUrl
+    in
+        Http.send NewImage request
+
+
+decodeImgUrl : Decode.Decoder String
+decodeImgUrl =
+    Decode.at [ "artists", "items", "0", "images", "0", "url" ] Decode.string
