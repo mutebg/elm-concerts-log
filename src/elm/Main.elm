@@ -40,6 +40,12 @@ type FormActions
     | None
 
 
+type alias User =
+    { name : String
+    , avatar : String
+    }
+
+
 
 -- PORTS
 
@@ -59,6 +65,15 @@ port removeEvent : Event -> Cmd msg
 port eventSaved : (String -> msg) -> Sub msg
 
 
+port toggleSignIn : String -> Cmd msg
+
+
+port signIn : (User -> msg) -> Sub msg
+
+
+port signOut : (String -> msg) -> Sub msg
+
+
 
 -- MODEL
 
@@ -71,6 +86,7 @@ type alias Model =
     , openNav : Bool
     , showForm : FormActions
     , currentEvent : Event
+    , user : Maybe User
     }
 
 
@@ -83,6 +99,7 @@ initModel =
     , openNav = False
     , showForm = None
     , currentEvent = emptyEvent
+    , user = Nothing
     }
 
 
@@ -100,6 +117,8 @@ subscriptions model =
     Sub.batch
         [ newEvent EventAdded
         , eventSaved EventSaved
+        , signIn SignIn
+        , signOut SignOut
         ]
 
 
@@ -109,6 +128,9 @@ subscriptions model =
 
 type Msg
     = NoOp
+    | ToggleSignIn
+    | SignIn User
+    | SignOut String
     | ToggleNav
     | MoveTo Int
     | TransitionTo Int
@@ -130,6 +152,15 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        ToggleSignIn ->
+            ( model, toggleSignIn "none" )
+
+        SignIn newUser ->
+            ( { model | user = Just newUser }, Cmd.none )
+
+        SignOut none ->
+            ( { model | user = Nothing }, Cmd.none )
 
         ToggleNav ->
             ( { model | openNav = not model.openNav }, Cmd.none )
@@ -187,6 +218,16 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
+    case model.user of
+        Just user ->
+            renderUserPage model
+
+        Nothing ->
+            showLoginButton model
+
+
+renderUserPage : Model -> Html Msg
+renderUserPage model =
     div
         [ class
             (if model.openNav then
@@ -285,6 +326,7 @@ printNav model =
                 )
                 model.events
             )
+        , showLogOutButton model
         ]
 
 
@@ -314,6 +356,38 @@ printEventForm event title action =
           --, input [ class "popup__input", type_ "url", placeholder "Image", value event.imgUrl, onInput (UpdateEvenInput "imgUrl") ] []
         , button [ class "popup__submit", onClick action ] [ text "Save " ]
         ]
+
+
+
+-- renderHeader model =
+--     div [ class "header" ]
+--         [ showUploadButton model
+--         , showLoginButton model
+--         , showLogOutButton model
+--         , button
+--             [ onClick AddLabelForm ]
+--             [ text "add label" ]
+--         ]
+
+
+showLoginButton : Model -> Html Msg
+showLoginButton model =
+    case model.user of
+        Nothing ->
+            button [ onClick ToggleSignIn ] [ text "Login with Google Account" ]
+
+        _ ->
+            Html.text ""
+
+
+showLogOutButton : Model -> Html Msg
+showLogOutButton model =
+    case model.user of
+        Just user ->
+            button [ onClick ToggleSignIn ] [ text <| "Logout " ++ user.name ]
+
+        _ ->
+            Html.text ""
 
 
 updateFormInputs : Model -> String -> String -> Model
