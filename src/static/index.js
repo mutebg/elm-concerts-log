@@ -28,13 +28,13 @@ function toggleSignIn() {
     firebase
       .auth()
       .signInWithPopup(provider)
-      .then(result => {
+      .then(function(result) {
         var token = result.credential.accessToken;
         var user = result.user;
         signIn(user);
         loadItems();
       })
-      .catch(error => {});
+      .catch(function(error) {});
   } else {
     signOut();
     firebase.auth().signOut();
@@ -42,7 +42,7 @@ function toggleSignIn() {
 }
 
 function initApp() {
-  firebase.auth().onAuthStateChanged(user => {
+  firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       signIn(user);
       eventsListener();
@@ -65,9 +65,12 @@ function signOut() {
   elmApp.ports.signOut.send("none");
 }
 
-const eventsPath = () =>
-  "events/" +
-  (firebase.auth().currentUser ? firebase.auth().currentUser.uid : 0);
+const eventsPath = function() {
+  return (
+    "events/" +
+    (firebase.auth().currentUser ? firebase.auth().currentUser.uid : 0)
+  );
+};
 
 function addEvent(event) {
   var promise = database.ref(eventsPath()).push(event);
@@ -121,6 +124,6 @@ elmApp.ports.removeEvent.subscribe(function(event) {
 });
 
 // SIGN IN / SIGN OUT
-elmApp.ports.toggleSignIn.subscribe(() => {
+elmApp.ports.toggleSignIn.subscribe(function() {
   toggleSignIn();
 });
