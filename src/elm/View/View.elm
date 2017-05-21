@@ -181,7 +181,7 @@ showLogOutButton : Model -> Html Msg
 showLogOutButton model =
     case model.user of
         Just user ->
-            button [ class "btn", onClick ToggleSignIn ] [ text <| "Logout " ++ user.name ]
+            button [ class "logout", onClick ToggleSignIn ] [ text <| "Logout " ++ user.name ]
 
         _ ->
             Html.text ""
