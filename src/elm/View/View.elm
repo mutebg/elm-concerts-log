@@ -127,7 +127,14 @@ printNav model =
             []
             (List.indexedMap
                 (\index event ->
-                    li [ onClick (TransitionTo index) ]
+                    li
+                        [ onClick
+                            (if not <| model.selected == index then
+                                TransitionTo index
+                             else
+                                NoOp
+                            )
+                        ]
                         [ span [ class "large" ] [ text event.name ]
                         , span [ class "small" ]
                             [ text (event.datetime ++ " " ++ event.place) ]
