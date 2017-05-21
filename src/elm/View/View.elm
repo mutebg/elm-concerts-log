@@ -21,22 +21,26 @@ view model =
 
 logedUserPage : Model -> Html Msg
 logedUserPage model =
-    div
-        [ class
-            (if model.openNav then
-                "main main--with-nav"
-             else
-                "main"
-            )
-        ]
-        [ printNav model
-        , button [ class "nav-btn", onClick ToggleNav ] []
-        , button [ class "btn btn--prev", disabled model.inTransition, onClick (TransitionTo (model.selected - 1)) ] []
-        , printEvents model
-        , button [ class "btn btn--next", disabled model.inTransition, onClick (TransitionTo (model.selected + 1)) ] []
-        , a [ href "https://github.com/mutebg/elm-concerts-log", class "copy" ] [ text "source code" ]
-        , printEventPopup model
-        ]
+    let
+        scopedHasEvents =
+            whenHasEvents model
+    in
+        div
+            [ class
+                (if model.openNav then
+                    "main main--with-nav"
+                 else
+                    "main"
+                )
+            ]
+            [ printNav model
+            , button [ class "nav-btn", onClick ToggleNav ] []
+            , scopedHasEvents (eventNavBtn model "prev") (Html.text "")
+            , printEvents model
+            , scopedHasEvents (eventNavBtn model "next") (Html.text "")
+            , a [ href "https://github.com/mutebg/elm-concerts-log", class "copy" ] [ text "source code" ]
+            , printEventPopup model
+            ]
 
 
 unLogedUserpage : Model -> Html Msg
@@ -47,14 +51,35 @@ unLogedUserpage model =
         ]
 
 
+eventNavBtn : Model -> String -> Html Msg
+eventNavBtn model nextOrPrev =
+    let
+        index =
+            if nextOrPrev == "next" then
+                model.selected + 1
+            else
+                model.selected + 1
+    in
+        button
+            [ class ("btn btn--" ++ nextOrPrev)
+            , disabled model.inTransition
+            , onClick (TransitionTo index)
+            ]
+            []
+
+
 printEvents : Model -> Html Msg
 printEvents model =
     let
         curryPrintEvent =
             printEvent model.selected model.next model.inTransition
+
+        eventsList =
+            div
+                [ class "events" ]
+                (List.indexedMap curryPrintEvent model.events)
     in
-        div [ class "events" ]
-            (List.indexedMap curryPrintEvent model.events)
+        whenHasEvents model eventsList noEvents
 
 
 printEvent : Int -> Int -> Bool -> Int -> Event -> Html Msg
@@ -160,3 +185,18 @@ showLogOutButton model =
 
         _ ->
             Html.text ""
+
+
+whenHasEvents : Model -> Html Msg -> Html Msg -> Html Msg
+whenHasEvents model has notHas =
+    if not <| List.isEmpty model.events then
+        has
+    else
+        notHas
+
+
+noEvents : Html Msg
+noEvents =
+    div
+        [ class "no-events" ]
+        [ text "Please add events from top right naigation" ]
