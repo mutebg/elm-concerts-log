@@ -1,4 +1,4 @@
-port module Update.Update exposing (..)
+module Update.Update exposing (..)
 
 import Model.Model exposing (..)
 import Array
@@ -8,6 +8,7 @@ import Json.Decode as Decode
 import Http
 import Time
 import Ports.Ports exposing (..)
+import Navigation exposing (..)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -15,6 +16,12 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        Navigate page ->
+            ( model, newUrl <| pageToHash page )
+
+        ChangePage page ->
+            ( { model | page = page }, Cmd.none )
 
         ToggleSignIn ->
             ( model, toggleSignIn "none" )
@@ -154,3 +161,19 @@ delay time msg =
     Process.sleep time
         |> Task.andThen (always <| Task.succeed msg)
         |> Task.perform identity
+
+
+pageToHash : Page -> String
+pageToHash page =
+    case page of
+        Home ->
+            "#"
+
+        Details id ->
+            "#details/" ++ id
+
+        LogIn ->
+            "#login"
+
+        NotFound ->
+            "#notfound"

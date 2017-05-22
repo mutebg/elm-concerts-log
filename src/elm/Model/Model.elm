@@ -3,6 +3,13 @@ module Model.Model exposing (..)
 import Http
 
 
+type Page
+    = Home
+    | Details String
+    | LogIn
+    | NotFound
+
+
 type alias Event =
     { id : String
     , imgUrl : String
@@ -35,6 +42,7 @@ type alias Model =
     , showForm : FormActions
     , currentEvent : Event
     , user : Maybe User
+    , page : Page
     }
 
 
@@ -57,6 +65,8 @@ type Msg
     | DeleteEvent Event
     | FetchImage
     | NewImage (Result Http.Error String)
+    | Navigate Page
+    | ChangePage Page
 
 
 initModel : Model
@@ -69,6 +79,7 @@ initModel =
     , showForm = None
     , currentEvent = emptyEvent
     , user = Nothing
+    , page = Home
     }
 
 
