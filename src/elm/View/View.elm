@@ -11,6 +11,16 @@ import Model.Model exposing (..)
 
 view : Model -> Html Msg
 view model =
+    case model.page of
+        Home ->
+            homePage model
+
+        _ ->
+            pageNotFound
+
+
+homePage : Model -> Html Msg
+homePage model =
     case model.user of
         Just user ->
             logedUserPage model
@@ -207,3 +217,8 @@ noEvents =
     div
         [ class "no-events" ]
         [ text "Please add events from top right naigation" ]
+
+
+pageNotFound : Html Msg
+pageNotFound =
+    div [] [ text "no such a page" ]

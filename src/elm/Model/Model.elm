@@ -1,6 +1,7 @@
 module Model.Model exposing (..)
 
 import Http
+import Navigation exposing (Location)
 
 
 type Page
@@ -65,8 +66,7 @@ type Msg
     | DeleteEvent Event
     | FetchImage
     | NewImage (Result Http.Error String)
-    | Navigate Page
-    | ChangePage Page
+    | OnLocationChange Location
 
 
 initModel : Model

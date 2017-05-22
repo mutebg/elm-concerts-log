@@ -8,7 +8,7 @@ import Json.Decode as Decode
 import Http
 import Time
 import Ports.Ports exposing (..)
-import Navigation exposing (..)
+import Routing exposing (parseLocation)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -17,11 +17,12 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        Navigate page ->
-            ( model, newUrl <| pageToHash page )
-
-        ChangePage page ->
-            ( { model | page = page }, Cmd.none )
+        OnLocationChange location ->
+            let
+                newRoute =
+                    parseLocation location
+            in
+                ( { model | page = newRoute }, Cmd.none )
 
         ToggleSignIn ->
             ( model, toggleSignIn "none" )
