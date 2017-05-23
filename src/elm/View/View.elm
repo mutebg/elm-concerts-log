@@ -15,6 +15,9 @@ view model =
         Home ->
             homePage model
 
+        Details id ->
+            detailsPage model id
+
         _ ->
             pageNotFound
 
@@ -27,6 +30,24 @@ homePage model =
 
         Nothing ->
             unLogedUserpage model
+
+
+detailsPage : Model -> String -> Html Msg
+detailsPage model eventID =
+    let
+        eventMaybe =
+            List.head <|
+                List.filter (\e -> e.id == eventID) model.events
+    in
+        case eventMaybe of
+            Just event ->
+                div []
+                    [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
+                    , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
+                    ]
+
+            Nothing ->
+                pageNotFound
 
 
 logedUserPage : Model -> Html Msg
@@ -122,8 +143,7 @@ printEvent selected next inTransition index event =
                 , p [ class "event__date" ] [ text event.datetime ]
                 , p [ class "event__place" ] [ text (event.place ++ ", " ++ event.location) ]
                 , p [ class "event__edit" ]
-                    [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
-                    , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
+                    [ a [ href ("#details/" ++ event.id) ] [ text "View" ]
                     ]
                 ]
             ]
