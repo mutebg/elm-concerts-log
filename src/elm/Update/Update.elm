@@ -5,10 +5,12 @@ import Array
 import Process
 import Task
 import Json.Decode as Decode
+import Json.Decode.Pipeline exposing (decode, required)
 import Http
 import Time
 import Ports.Ports exposing (..)
 import Routing exposing (parseLocation)
+import RemoteData
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -21,8 +23,11 @@ update msg model =
             let
                 newRoute =
                     parseLocation location
+
+                cmd =
+                    pageToCmd model newRoute
             in
-                ( { model | page = newRoute }, Cmd.none )
+                ( { model | page = newRoute }, cmd )
 
         ToggleSignIn ->
             ( model, toggleSignIn "none" )
@@ -81,6 +86,12 @@ update msg model =
 
         NewImage (Err _) ->
             ( updateFormInputs model "imgUrl" "http://kingofwallpapers.com/band/band-006.jpg", Cmd.none )
+
+        FetchEventDetails ->
+            ( model, Cmd.none )
+
+        OnFetchSetlist response ->
+            ( { model | setlist = response }, Cmd.none )
 
 
 updateFormInputs : Model -> String -> String -> Model
@@ -147,6 +158,28 @@ decodeImgUrl =
     Decode.at [ "artists", "items", "0", "images", "0", "url" ] Decode.string
 
 
+fetchEventDetails : Event -> Cmd Msg
+fetchEventDetails event =
+    let
+        url =
+            "http://api.setlist.fm/rest/0.1/search/setlists.json?artistName=" ++ event.name
+    in
+        Http.get url decodeSetlist
+            |> RemoteData.sendRequest
+            |> Cmd.map OnFetchSetlist
+
+
+decodeSetlist : Decode.Decoder (List String)
+decodeSetlist =
+    --Decode.at [ "setlists", "setlist", "0", "sets", "set", "song" ] Decode.list (decodeSetlistItem)
+    Decode.list (decodeSetlistItem)
+
+
+decodeSetlistItem : Decode.Decoder String
+decodeSetlistItem =
+    Decode.at [ "setlists", "setlist", "0", "sets", "set", "song", "@name" ] Decode.string
+
+
 moveTo : Int -> Model -> Int
 moveTo index model =
     if index >= 0 && index < List.length model.events then
@@ -178,3 +211,24 @@ pageToHash page =
 
         NotFound ->
             "#notfound"
+
+
+getEventByID : String -> List Event -> Maybe Event
+getEventByID id events =
+    List.head <|
+        List.filter (\e -> e.id == id) events
+
+
+pageToCmd : Model -> Page -> Cmd Msg
+pageToCmd model page =
+    case page of
+        Details id ->
+            case getEventByID id model.events of
+                Just event ->
+                    fetchEventDetails event
+
+                _ ->
+                    Cmd.none
+
+        _ ->
+            Cmd.none

@@ -2,6 +2,7 @@ module Model.Model exposing (..)
 
 import Http
 import Navigation exposing (Location)
+import RemoteData exposing (WebData)
 
 
 type Page
@@ -44,6 +45,7 @@ type alias Model =
     , currentEvent : Event
     , user : Maybe User
     , page : Page
+    , setlist : WebData (List String)
     }
 
 
@@ -67,6 +69,8 @@ type Msg
     | FetchImage
     | NewImage (Result Http.Error String)
     | OnLocationChange Location
+    | FetchEventDetails
+    | OnFetchSetlist (WebData (List String))
 
 
 initModel : Model
@@ -80,6 +84,7 @@ initModel =
     , currentEvent = emptyEvent
     , user = Nothing
     , page = Home
+    , setlist = RemoteData.NotAsked
     }
 
 

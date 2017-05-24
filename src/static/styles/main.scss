@@ -123,20 +123,22 @@ button
         font-size: 1.8em;
     }
 
-    &__edit button
+    &__edit
     {
-        font-size: .7em;
+      a,
+      button {
+          font-size: .7em;
+          display: inline-block;
+          padding: .5em;
+          transition: .2s linear all;
 
-        padding: .5em;
+          background: #fff;
+          &:hover
+          {
+              transform: scale(1.05);
 
-        transition: .2s linear all;
-
-        background: #fff;
-        &:hover
-        {
-            transform: scale(1.05);
-
-            background: #cecbcb;
+              background: #cecbcb;
+          }
         }
     }
 
@@ -328,29 +330,22 @@ button
         }
     }
 
-    &__img
-    {
+    &__img {
         position: absolute;
-
         height: calc(3em + 3px);
         margin-top: calc(1em + 2px);
-
         transform: translateX(-100%);
-
         border-left: 2px solid #ccc;
     }
 }
 
-.copy
-{
+.copy {
     font-size: 1em;
-
     position: fixed;
     position: absolute;
     z-index: 40;
     right: $btn-size;
     bottom: $btn-size / 2;
-
     color: #fff;
 }
 

@@ -1,7 +1,7 @@
 module Routing exposing (..)
 
 import Navigation exposing (Location)
-import Model.Model exposing (Page(..))
+import Model.Model exposing (Msg, Msg(..), Page, Page(..))
 import UrlParser exposing (..)
 
 
@@ -18,8 +18,8 @@ matchers =
 parseLocation : Location -> Page
 parseLocation location =
     case (parseHash matchers location) of
-        Just route ->
-            route
+        Just page ->
+            page
 
         Nothing ->
             NotFound

@@ -4,6 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onBlur)
 import Model.Model exposing (..)
+import Update.Update exposing (..)
 
 
 -- VIEW
@@ -34,20 +35,12 @@ homePage model =
 
 detailsPage : Model -> String -> Html Msg
 detailsPage model eventID =
-    let
-        eventMaybe =
-            List.head <|
-                List.filter (\e -> e.id == eventID) model.events
-    in
-        case eventMaybe of
-            Just event ->
-                div []
-                    [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
-                    , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
-                    ]
+    case (getEventByID eventID model.events) of
+        Just event ->
+            div [] [ text event.name ]
 
-            Nothing ->
-                pageNotFound
+        Nothing ->
+            pageNotFound
 
 
 logedUserPage : Model -> Html Msg
@@ -143,7 +136,9 @@ printEvent selected next inTransition index event =
                 , p [ class "event__date" ] [ text event.datetime ]
                 , p [ class "event__place" ] [ text (event.place ++ ", " ++ event.location) ]
                 , p [ class "event__edit" ]
-                    [ a [ href ("#details/" ++ event.id) ] [ text "View" ]
+                    [ button [ onClick (EditEventForm event) ] [ text "Edit" ]
+                    , button [ onClick (DeleteEvent event) ] [ text "Delete" ]
+                    , a [ href ("#details/" ++ event.id) ] [ text "More info" ]
                     ]
                 ]
             ]
