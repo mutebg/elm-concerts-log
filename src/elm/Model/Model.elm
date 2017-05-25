@@ -20,6 +20,7 @@ type alias Event =
     , place : String
     , color : String
     , datetime : String
+    , spotifyBandId : String
     }
 
 
@@ -102,4 +103,5 @@ emptyEvent =
     , place = ""
     , color = "red"
     , datetime = ""
+    , spotifyBandId = ""
     }
